@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 public class Main {
 
     public static void main(String[] args) {
-        GameMap gameMap = new GameMap(8, 10);
+        GameMap gameMap = new GameMap(10, 10);
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while(true) {
             gameMap = play(gameMap, reader);
@@ -78,6 +78,7 @@ public class Main {
 
         if (gameMap.isMine(location)) {
             System.out.println("You clicked the mine and died.");
+            printEndGameMap(gameMap);
             System.exit(0);
         }
 
@@ -87,6 +88,21 @@ public class Main {
     private static GameMap calculateGameMapChange(GameMap gameMap, Location clickedLocation) {
         gameMap.getField(clickedLocation.getRow(), clickedLocation.getColumn()).setVisible();
         return gameMap;
+    }
+    private static void printEndGameMap(GameMap gameMap) {
+        int dimension = gameMap.getDimension();
+        System.out.println();
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+                Field field = gameMap.getField(i, j);
+                if (field.isMine()) {
+                    System.out.print(" X ");
+                } else {
+                    System.out.print(" " + field.getNumberOfNeighbourMines() + " ");
+                }
+            }
+            System.out.println();
+        }
     }
 
 }
