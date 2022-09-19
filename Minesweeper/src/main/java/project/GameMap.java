@@ -111,4 +111,14 @@ public class GameMap {
         return fields.get(location);
     }
 
+    public boolean isVisible(Location location) {
+        Field field = getField(location.getRow(), location.getColumn());
+        return field.isVisible();
+    }
+
+    public boolean isMine(Location location) {
+        Field field = getField(location.getRow(), location.getColumn());
+        return field.isMine();
+    }
+
 }
