@@ -107,8 +107,21 @@ public class GameMap {
     }
 
     public Field getField(int row, int column) {
-        Location location = new Location(row, column);
+        return fields.get(new Location(row, column));
+    }
+
+    public Field getField(Location location) {
         return fields.get(location);
+    }
+
+    public boolean isVisible(Location location) {
+        Field field = getField(location.getRow(), location.getColumn());
+        return field.isVisible();
+    }
+
+    public boolean isMine(Location location) {
+        Field field = getField(location.getRow(), location.getColumn());
+        return field.isMine();
     }
 
 }

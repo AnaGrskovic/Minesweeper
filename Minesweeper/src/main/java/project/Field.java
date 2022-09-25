@@ -23,20 +23,14 @@ public class Field {
     public boolean isMine() {
         return isMine;
     }
-    public void setMine(boolean mine) {
-        isMine = mine;
-    }
     public boolean isVisible() {
         return isVisible;
     }
-    public void setVisible(boolean visible) {
-        isVisible = visible;
+    public void setVisible() {
+        isVisible = true;
     }
     public Integer getNumberOfNeighbourMines() {
         return numberOfNeighbourMines;
-    }
-    public void setNumberOfNeighbourMines(Integer numberOfNeighbourMines) {
-        this.numberOfNeighbourMines = numberOfNeighbourMines;
     }
 
 }
