@@ -11,37 +11,31 @@ public class GameMap {
     private int numberOfMines;
     private List<Location> mineLocations;
     private Map<Location, Field> fields;
+    private List<Listener> listeners;
+    private GameStatus gameStatus;
 
     public GameMap(int dimension, int numberOfMines) {
         this.dimension = dimension;
         this.numberOfMines = numberOfMines;
         this.mineLocations = generateMineLocations(dimension, numberOfMines);
         this.fields = generateFields(dimension, mineLocations);
+        this.listeners = new ArrayList<>();
+        this.gameStatus = GameStatus.playing;
     }
 
     public int getDimension() {
         return dimension;
     }
-    public void setDimension(int dimension) {
-        this.dimension = dimension;
+    public GameStatus getGameStatus() { return gameStatus; }
+
+    public void addListener(Listener listener) {
+        this.listeners.add(listener);
     }
-    public int getNumberOfMines() {
-        return numberOfMines;
-    }
-    public void setNumberOfMines(int numberOfMines) {
-        this.numberOfMines = numberOfMines;
-    }
-    public List<Location> getMineLocations() {
-        return mineLocations;
-    }
-    public void setMineLocations(List<Location> mineLocations) {
-        this.mineLocations = mineLocations;
-    }
-    public Map<Location, Field> getFields() {
-        return fields;
-    }
-    public void setFields(Map<Location, Field> fields) {
-        this.fields = fields;
+
+    public void notifyListeners() {
+        for (Listener listener : listeners) {
+            listener.locationClicked(this);
+        }
     }
 
     private List<Location> generateMineLocations(int dimension, int numberOfMines) {
@@ -114,14 +108,64 @@ public class GameMap {
         return fields.get(location);
     }
 
-    public boolean isVisible(Location location) {
-        Field field = getField(location.getRow(), location.getColumn());
-        return field.isVisible();
+    public void calculateGameMapChange(Location clickedLocation) {
+        Field clickedField = this.getField(clickedLocation);
+        clickedField.setVisible();
+        if (clickedField.isMine()) {
+            this.gameStatus = GameStatus.lost;
+            for (Field field : this.fields.values()) {
+                field.setVisible();
+            }
+            notifyListeners();
+            return;
+        }
+        if (clickedField.getNumberOfNeighbourMines() == 0) {
+            setNeighboursVisible(clickedLocation);
+        }
+        checkIfGameIsWon();
+        notifyListeners();
     }
 
-    public boolean isMine(Location location) {
-        Field field = getField(location.getRow(), location.getColumn());
-        return field.isMine();
+    private void setNeighboursVisible(Location clickedLocation) {
+        List<Location> neighbourLocations = getNeighbourLocations(clickedLocation);
+        for (Location location : neighbourLocations) {
+            Field field = this.getField(location);
+            if (!field.isVisible()) {
+                field.setVisible();
+                if (field.getNumberOfNeighbourMines() == 0) {
+                    setNeighboursVisible(location);
+                }
+            }
+        }
+    }
+
+    private List<Location> getNeighbourLocations(Location clickedLocation) {
+        int row = clickedLocation.getRow();
+        int column = clickedLocation.getColumn();
+        int dimension = this.getDimension();
+        List<Location> neighbourLocations = new ArrayList<>();
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = column - 1; j <= column + 1; j++) {
+                if (i >= 0 && j >= 0 && i <= dimension - 1 && j <= dimension - 1) {
+                    if (i != clickedLocation.getRow() || j != clickedLocation.getColumn()) {
+                        neighbourLocations.add(new Location(i, j));
+                    }
+                }
+            }
+        }
+        return neighbourLocations;
+    }
+
+    private void checkIfGameIsWon() {
+        boolean isWon = true;
+        for (Field field : this.fields.values()) {
+            if (!field.isVisible() && !field.isMine()) {
+                isWon = false;
+            }
+        }
+        if (isWon == true) {
+            this.gameStatus = GameStatus.won;
+        }
     }
 
 }
