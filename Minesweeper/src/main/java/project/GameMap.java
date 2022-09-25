@@ -12,6 +12,7 @@ public class GameMap {
     private List<Location> mineLocations;
     private Map<Location, Field> fields;
     private List<Listener> listeners;
+    private GameStatus gameStatus;
 
     public GameMap(int dimension, int numberOfMines) {
         this.dimension = dimension;
@@ -19,39 +20,16 @@ public class GameMap {
         this.mineLocations = generateMineLocations(dimension, numberOfMines);
         this.fields = generateFields(dimension, mineLocations);
         this.listeners = new ArrayList<>();
+        this.gameStatus = GameStatus.playing;
     }
 
     public int getDimension() {
         return dimension;
     }
-    public void setDimension(int dimension) {
-        this.dimension = dimension;
-    }
-    public int getNumberOfMines() {
-        return numberOfMines;
-    }
-    public void setNumberOfMines(int numberOfMines) {
-        this.numberOfMines = numberOfMines;
-    }
-    public List<Location> getMineLocations() {
-        return mineLocations;
-    }
-    public void setMineLocations(List<Location> mineLocations) {
-        this.mineLocations = mineLocations;
-    }
-    public Map<Location, Field> getFields() {
-        return fields;
-    }
-    public void setFields(Map<Location, Field> fields) {
-        this.fields = fields;
-    }
+    public GameStatus getGameStatus() { return gameStatus; }
 
     public void addListener(Listener listener) {
         this.listeners.add(listener);
-    }
-
-    public void removeListener(Listener listener) {
-        this.listeners.remove(listener);
     }
 
     public void notifyListeners() {
@@ -130,26 +108,21 @@ public class GameMap {
         return fields.get(location);
     }
 
-    public boolean isVisible(Location location) {
-        Field field = getField(location.getRow(), location.getColumn());
-        return field.isVisible();
-    }
-
-    public boolean isMine(Location location) {
-        Field field = getField(location.getRow(), location.getColumn());
-        return field.isMine();
-    }
-
     public void calculateGameMapChange(Location clickedLocation) {
         Field clickedField = this.getField(clickedLocation);
         clickedField.setVisible();
         if (clickedField.isMine()) {
-            System.out.println("You clicked the mine and died.");
-            System.exit(0);
+            this.gameStatus = GameStatus.lost;
+            for (Field field : this.fields.values()) {
+                field.setVisible();
+            }
+            notifyListeners();
+            return;
         }
         if (clickedField.getNumberOfNeighbourMines() == 0) {
             setNeighboursVisible(clickedLocation);
         }
+        checkIfGameIsWon();
         notifyListeners();
     }
 
@@ -181,6 +154,18 @@ public class GameMap {
             }
         }
         return neighbourLocations;
+    }
+
+    private void checkIfGameIsWon() {
+        boolean isWon = true;
+        for (Field field : this.fields.values()) {
+            if (!field.isVisible() && !field.isMine()) {
+                isWon = false;
+            }
+        }
+        if (isWon == true) {
+            this.gameStatus = GameStatus.won;
+        }
     }
 
 }

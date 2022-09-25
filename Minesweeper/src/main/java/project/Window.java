@@ -29,18 +29,38 @@ public class Window extends JFrame {
     private void initGUI() {
 
         Container cp = getContentPane();
-        cp.setLayout(new GridLayout(dimension, dimension));
+        cp.setLayout(new BorderLayout());
+
+        JLabel jLabel = generateLabel();
+
+        JPanel p = new JPanel();
+        p.setLayout(new GridLayout(dimension, dimension));
 
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 Location location = new Location(i, j);
-                generateAndAddNumberButton(cp, location);
+                JButton jButton = generateButtonAndAddListener(location);
+                p.add(jButton);
             }
         }
 
+        cp.add(jLabel, BorderLayout.PAGE_START);
+        cp.add(p, BorderLayout.CENTER);
+
     }
 
-    private JButton generateButton() {
+    private JLabel generateLabel() {
+        JLabel jLabel = new JLabel();
+        jLabel.setOpaque(true);
+        jLabel.setBackground(Color.LIGHT_GRAY);
+        jLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        jLabel.setHorizontalAlignment(JLabel.CENTER);
+        jLabel.setPreferredSize(new Dimension(70 * dimension, 70));
+        jLabel.setFont(jLabel.getFont().deriveFont(30f));
+        return jLabel;
+    }
+
+    private JButton generateButtonAndAddListener(Location location) {
         JButton jButton = new JButton();
         jButton.setOpaque(true);
         jButton.setBackground(Color.LIGHT_GRAY);
@@ -48,14 +68,9 @@ public class Window extends JFrame {
         jButton.setHorizontalAlignment(JLabel.CENTER);
         jButton.setPreferredSize(new Dimension(70, 70));
         jButton.setFont(jButton.getFont().deriveFont(30f));
-        return jButton;
-    }
-
-    private void generateAndAddNumberButton(Container cp, Location location) {
-        JButton jButton = generateButton();
         LocationListener locationListener = new LocationListener(location);
         jButton.addActionListener(e -> { locationListener.locationClicked(this.gameMap); });
-        cp.add(jButton);
+        return jButton;
     }
 
     private class ModelListener implements Listener {
@@ -73,18 +88,25 @@ public class Window extends JFrame {
 
     public void Update() {
         Container cp = getContentPane();
-        Component[] components = cp.getComponents();
+        Component[] contentPaneComponents = cp.getComponents();
+        Component[] panelComponents = ((JPanel) contentPaneComponents[1]).getComponents();
+
+        if (gameMap.getGameStatus() == GameStatus.lost) {
+            ((JLabel) contentPaneComponents[0]).setText("You lost! :(");
+        } else if (gameMap.getGameStatus() == GameStatus.won) {
+            ((JLabel) contentPaneComponents[0]).setText("You won! :)");
+        }
+
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 int index = j + i * dimension;
                 Field field = gameMap.getField(i, j);
                 if (field.isVisible()) {
+                    JButton button = (JButton) panelComponents[index];
                     if (field.isMine()) {
-                        JButton button = (JButton) components[index];
                         button.setText("X");
                         button.setBackground(Color.WHITE);
                     } else {
-                        JButton button = (JButton) components[index];
                         Integer numberOfNeighbourMines = field.getNumberOfNeighbourMines();
                         if (numberOfNeighbourMines != 0) {
                             button.setText(numberOfNeighbourMines.toString());
