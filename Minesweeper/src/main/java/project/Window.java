@@ -47,7 +47,7 @@ public class Window extends JFrame {
         jButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         jButton.setHorizontalAlignment(JLabel.CENTER);
         jButton.setPreferredSize(new Dimension(70, 70));
-        jButton.setFont(jButton.getFont().deriveFont(15f));
+        jButton.setFont(jButton.getFont().deriveFont(30f));
         return jButton;
     }
 
@@ -58,7 +58,7 @@ public class Window extends JFrame {
         cp.add(jButton);
     }
 
-    private static class ModelListener implements Listener {
+    private class ModelListener implements Listener {
 
         private ModelListener() {
             gameMap.addListener(this);
@@ -66,9 +66,34 @@ public class Window extends JFrame {
 
         @Override
         public void locationClicked(GameMap gameMap) {
-            System.out.println("WINDOW HEARD THAT MODEL CHANGED");
+            Update();
         }
 
+    }
+
+    public void Update() {
+        Container cp = getContentPane();
+        Component[] components = cp.getComponents();
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+                int index = j + i * dimension;
+                Field field = gameMap.getField(i, j);
+                if (field.isVisible()) {
+                    if (field.isMine()) {
+                        JButton button = (JButton) components[index];
+                        button.setText("X");
+                        button.setBackground(Color.WHITE);
+                    } else {
+                        JButton button = (JButton) components[index];
+                        Integer numberOfNeighbourMines = field.getNumberOfNeighbourMines();
+                        if (numberOfNeighbourMines != 0) {
+                            button.setText(numberOfNeighbourMines.toString());
+                        }
+                        button.setBackground(Color.WHITE);
+                    }
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {

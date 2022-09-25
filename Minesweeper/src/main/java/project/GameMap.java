@@ -151,27 +151,6 @@ public class GameMap {
             setNeighboursVisible(clickedLocation);
         }
         notifyListeners();
-        printGameMap(this);
-    }
-
-    private static void printGameMap(GameMap gameMap) {
-        int dimension = gameMap.getDimension();
-        System.out.println();
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < dimension; j++) {
-                Field field = gameMap.getField(i, j);
-                if (field.isVisible()) {
-                    if (field.isMine()) {
-                        System.out.print(" X ");
-                    } else {
-                        System.out.print(" " + field.getNumberOfNeighbourMines() + " ");
-                    }
-                } else {
-                    System.out.print(" ? ");
-                }
-            }
-            System.out.println();
-        }
     }
 
     private void setNeighboursVisible(Location clickedLocation) {
