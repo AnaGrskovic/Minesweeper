@@ -10,7 +10,7 @@ public class LocationListener implements Listener {
 
     @Override
     public void locationClicked(GameMap gameMap) {
-        // todo
+        gameMap.calculateGameMapChange(this.location);
     }
 
 }

@@ -21,6 +21,9 @@ public class Window extends JFrame {
 
         pack();
 
+        ModelListener modelListener = new ModelListener();
+        gameMap.addListener(modelListener);
+
     }
 
     private void initGUI() {
@@ -28,8 +31,11 @@ public class Window extends JFrame {
         Container cp = getContentPane();
         cp.setLayout(new GridLayout(dimension, dimension));
 
-        for (int i = 0; i < dimension * dimension; i++) {
-            generateAndAddNumberButton(cp);
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+                Location location = new Location(i, j);
+                generateAndAddNumberButton(cp, location);
+            }
         }
 
     }
@@ -45,12 +51,24 @@ public class Window extends JFrame {
         return jButton;
     }
 
-    private void generateAndAddNumberButton(Container cp) {
+    private void generateAndAddNumberButton(Container cp, Location location) {
         JButton jButton = generateButton();
-        // todo
-        //NumberCalcValueListener numberCalcValueListener = new NumberCalcValueListener(number);
-        //jButton.addActionListener(e -> { numberCalcValueListener.valueChanged(this.calcModel); });
+        LocationListener locationListener = new LocationListener(location);
+        jButton.addActionListener(e -> { locationListener.locationClicked(this.gameMap); });
         cp.add(jButton);
+    }
+
+    private static class ModelListener implements Listener {
+
+        private ModelListener() {
+            gameMap.addListener(this);
+        }
+
+        @Override
+        public void locationClicked(GameMap gameMap) {
+            System.out.println("WINDOW HEARD THAT MODEL CHANGED");
+        }
+
     }
 
     public static void main(String[] args) {

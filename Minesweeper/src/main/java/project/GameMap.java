@@ -11,12 +11,14 @@ public class GameMap {
     private int numberOfMines;
     private List<Location> mineLocations;
     private Map<Location, Field> fields;
+    private List<Listener> listeners;
 
     public GameMap(int dimension, int numberOfMines) {
         this.dimension = dimension;
         this.numberOfMines = numberOfMines;
         this.mineLocations = generateMineLocations(dimension, numberOfMines);
         this.fields = generateFields(dimension, mineLocations);
+        this.listeners = new ArrayList<>();
     }
 
     public int getDimension() {
@@ -42,6 +44,20 @@ public class GameMap {
     }
     public void setFields(Map<Location, Field> fields) {
         this.fields = fields;
+    }
+
+    public void addListener(Listener listener) {
+        this.listeners.add(listener);
+    }
+
+    public void removeListener(Listener listener) {
+        this.listeners.remove(listener);
+    }
+
+    public void notifyListeners() {
+        for (Listener listener : listeners) {
+            listener.locationClicked(this);
+        }
     }
 
     private List<Location> generateMineLocations(int dimension, int numberOfMines) {
@@ -127,8 +143,34 @@ public class GameMap {
     public void calculateGameMapChange(Location clickedLocation) {
         Field clickedField = this.getField(clickedLocation);
         clickedField.setVisible();
+        if (clickedField.isMine()) {
+            System.out.println("You clicked the mine and died.");
+            System.exit(0);
+        }
         if (clickedField.getNumberOfNeighbourMines() == 0) {
             setNeighboursVisible(clickedLocation);
+        }
+        notifyListeners();
+        printGameMap(this);
+    }
+
+    private static void printGameMap(GameMap gameMap) {
+        int dimension = gameMap.getDimension();
+        System.out.println();
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+                Field field = gameMap.getField(i, j);
+                if (field.isVisible()) {
+                    if (field.isMine()) {
+                        System.out.print(" X ");
+                    } else {
+                        System.out.print(" " + field.getNumberOfNeighbourMines() + " ");
+                    }
+                } else {
+                    System.out.print(" ? ");
+                }
+            }
+            System.out.println();
         }
     }
 
