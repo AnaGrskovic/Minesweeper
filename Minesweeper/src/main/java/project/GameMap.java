@@ -124,4 +124,42 @@ public class GameMap {
         return field.isMine();
     }
 
+    public void calculateGameMapChange(Location clickedLocation) {
+        Field clickedField = this.getField(clickedLocation);
+        clickedField.setVisible();
+        if (clickedField.getNumberOfNeighbourMines() == 0) {
+            setNeighboursVisible(clickedLocation);
+        }
+    }
+
+    private void setNeighboursVisible(Location clickedLocation) {
+        List<Location> neighbourLocations = getNeighbourLocations(clickedLocation);
+        for (Location location : neighbourLocations) {
+            Field field = this.getField(location);
+            if (!field.isVisible()) {
+                field.setVisible();
+                if (field.getNumberOfNeighbourMines() == 0) {
+                    setNeighboursVisible(location);
+                }
+            }
+        }
+    }
+
+    private List<Location> getNeighbourLocations(Location clickedLocation) {
+        int row = clickedLocation.getRow();
+        int column = clickedLocation.getColumn();
+        int dimension = this.getDimension();
+        List<Location> neighbourLocations = new ArrayList<>();
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = column - 1; j <= column + 1; j++) {
+                if (i >= 0 && j >= 0 && i <= dimension - 1 && j <= dimension - 1) {
+                    if (i != clickedLocation.getRow() || j != clickedLocation.getColumn()) {
+                        neighbourLocations.add(new Location(i, j));
+                    }
+                }
+            }
+        }
+        return neighbourLocations;
+    }
+
 }
