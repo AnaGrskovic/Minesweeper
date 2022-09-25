@@ -107,7 +107,10 @@ public class GameMap {
     }
 
     public Field getField(int row, int column) {
-        Location location = new Location(row, column);
+        return fields.get(new Location(row, column));
+    }
+
+    public Field getField(Location location) {
         return fields.get(location);
     }
 
